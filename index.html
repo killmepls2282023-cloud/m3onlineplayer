@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Glass Player + Audius</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <!-- Подключаем SDK Audius -->
+  <script src="https://cdn.jsdelivr.net/npm/@audius/sdk@latest/dist/sdk.min.js"></script>
+</head>
+<body>
+  <div class="bg"></div>
+
+  <main class="layout">
+    
+    <!-- ЛЕВАЯ КАРТОЧКА: Плеер -->
+    <div class="player glass">
+      <!-- Строка поиска -->
+      <div class="search-container">
+        <input type="text" id="search-input" placeholder="Поиск в Audius (напр. Lofi)..." />
+      </div>
+
+ <img class="player__cover" id="cover" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Обложка" />
+      
+      <div class="player__info">
+        <h1 class="player__title" id="title">Выбери трек</h1>
+        <p class="player__artist" id="artist">Audius</p>
+      </div>
+
+      <div class="equalizer paused" id="equalizer">
+        <div class="eq-bar"></div>
+        <div class="eq-bar"></div>
+        <div class="eq-bar"></div>
+        <div class="eq-bar"></div>
+        <div class="eq-bar"></div>
+      </div>
+
+      <div class="progress-container">
+        <input type="range" class="progress-input" id="progress" value="0" min="0" max="100" />
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+
+      <div class="time-container">
+        <span id="current-time">0:00</span>
+        <span id="total-time">0:00</span>
+      </div>
+
+      <div class="player__controls">
+        <button class="btn" id="prev" title="Назад">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.971 4.285A2 2 0 0 1 17 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z"/><path d="M21 20V4"/></svg>
+        </button>
+        <button class="btn btn--play" id="play" title="Play">
+          <svg class="icon icon--play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>
+          <svg class="icon icon--pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/></svg>
+        </button>
+        <button class="btn" id="next" title="Вперёд">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.029 4.285A2 2 0 0 0 7 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z"/><path d="M3 4v16"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ПРАВАЯ КАРТОЧКА -->
+    <aside class="library glass">
+      <h2 class="library__title">Плейлист (Audius)</h2>
+      <ul class="playlist" id="playlist"></ul>
+      <!-- Кнопка подгрузки -->
+      <button id="load-more-btn" class="btn-load-more" style="display: none;">Показать ещё</button>
+    </aside>
+
+  </main>
+
+  <audio id="audio"></audio>
+  <script src="script.js"></script>
+</body>
+</html>

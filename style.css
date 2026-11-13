@@ -1,0 +1,432 @@
+/* ===== БАЗА ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  overflow: hidden;
+  position: relative;
+  padding: 20px;
+  /* Запрещаем выделение текста при быстрых кликах на мобилке */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bg {
+  position: fixed;
+  inset: 0;
+  background: url('image/digital-art-with-city-landscape-.png') center/cover no-repeat;
+  filter: blur(20px) brightness(0.6);
+  transform: scale(1.1);
+  z-index: -1;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  border-radius: 24px;
+}
+
+.layout {
+  display: flex;
+  gap: 24px;
+  align-items: stretch;
+}
+
+/* ===== ПЛЕЕР ===== */
+.player {
+  width: min(380px, 90vw);
+  padding: 30px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-color: var(--theme-color, rgba(255, 255, 255, 0.25));
+  transition: border-color 0.4s ease;
+}
+
+.player__cover {
+  width: 220px;
+  height: 220px;
+  border-radius: 20px;
+  object-fit: cover;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+  margin-bottom: 20px;
+}
+
+.player__info {
+  text-align: center;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.player__title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player__artist {
+  font-size: 14px;
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== ПРОГРЕСС-БАР ===== */
+.progress-container {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+/* Увеличиваем невидимую зону клика для пальца */
+.progress-input {
+  position: absolute;
+  top: -10px; /* Расширяем зону вверх */
+  left: 0;
+  width: 100%;
+  height: 26px; /* Высота зоны захвата пальцем */
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+  margin: 0;
+}
+
+.progress-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #fff;
+  border-radius: 999px;
+}
+
+/* ===== ТАЙМИНГИ ===== */
+.time-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== КНОПКИ ===== */
+.player__controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  /* Убираем задержку клика на мобилках */
+  touch-action: manipulation; 
+}
+
+/* Меняем ховер на активное нажатие (работает и на ПК, и на телефоне) */
+.btn:active {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(0.95);
+}
+
+.btn--play {
+  width: 64px;
+  height: 64px;
+  background: var(--theme-color, rgba(255, 255, 255, 0.25));
+}
+
+/* ===== ИКОНКИ ===== */
+.icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+  pointer-events: none;
+}
+
+.btn--play .icon {
+  width: 28px;
+  height: 28px;
+}
+
+.icon--pause { display: none; }
+.btn--play.is-playing .icon--play  { display: none; }
+.btn--play.is-playing .icon--pause { display: block; }
+
+/* ===== БИБЛИОТЕКА ===== */
+.library {
+  width: min(320px, 90vw);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.library__title {
+  font-size: 18px;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+
+.playlist {
+  list-style: none;
+  height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  cursor: grab;
+}
+
+.playlist::-webkit-scrollbar { display: none; }
+.playlist:active { cursor: grabbing; }
+
+.playlist li {
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+  user-select: none;
+  background: rgba(255, 255, 255, 0.05);
+  /* Убираем задержку клика на мобилках */
+  touch-action: manipulation;
+}
+
+.playlist li:hover { background: rgba(255, 255, 255, 0.15); }
+.playlist li:active { background: rgba(255, 255, 255, 0.25); }
+
+.playlist li.active {
+  background: rgba(255, 255, 255, 0.3);
+  font-weight: 600;
+}
+
+/* ===== ЭКВАЛАЙЗЕР ===== */
+.equalizer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  height: 40px;
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 0 20px;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.equalizer:not(.paused) {
+  visibility: visible;
+  opacity: 1;
+}
+
+.eq-bar {
+  width: 6px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 999px;
+  height: 10%;
+}
+
+.eq-bar:nth-child(1) { animation: bounce 0.8s ease-in-out infinite; }
+.eq-bar:nth-child(2) { animation: bounce 0.6s ease-in-out infinite 0.1s; }
+.eq-bar:nth-child(3) { animation: bounce 0.9s ease-in-out infinite 0.2s; }
+.eq-bar:nth-child(4) { animation: bounce 0.7s ease-in-out infinite 0.3s; }
+.eq-bar:nth-child(5) { animation: bounce 0.5s ease-in-out infinite 0.4s; }
+
+@keyframes bounce {
+  0%   { height: 20%; }
+  50%  { height: 100%; }
+  100% { height: 20%; }
+}
+
+.equalizer.paused .eq-bar {
+  animation-play-state: paused;
+  height: 10%;
+}
+
+/* =========================================
+   ===== АДАПТИВ ДЛЯ ТЕЛЕФОНОВ И ПЛАНШЕТОВ =====
+   ========================================= */
+@media (max-width: 800px) {
+  body {
+    /* Разрешаем скролл страницы, чтобы дотянуться до второй карточки */
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 15px 10px;
+    align-items: flex-start; /* Прижимаем к верху при скролле */
+  }
+
+  .layout {
+    flex-direction: column; /* Карточки друг под другом */
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .player, .library {
+    width: 100%;
+  }
+
+  .player {
+    padding: 20px 16px;
+  }
+
+  /* Уменьшаем обложку, чтобы плеер влезал в экран айфона */
+  .player__cover {
+    width: 180px;
+    height: 180px;
+    margin-bottom: 16px;
+  }
+
+  .player__info {
+    margin-bottom: 16px;
+  }
+
+  .player__title {
+    font-size: 18px;
+  }
+
+ .playlist {
+  list-style: none;
+  height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  cursor: grab;
+  
+  /* ДОБАВЬ ЭТУ СТРОКУ: */
+  touch-action: pan-y; 
+  overscroll-behavior: contain; /* Запрещает скроллу "вытекать" на страницу */
+}
+  
+  /* На мобилках делаем кнопку Play чуть меньше */
+  .btn--play {
+    width: 56px;
+    height: 56px;
+  }
+}
+/* ===== СТИЛИ ДЛЯ ПОИСКА AUDIUS ===== */
+.search-container {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+#search-input {
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: background 0.3s;
+}
+
+#search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+#search-input:focus {
+  background: rgba(255, 255, 255, 0.2);
+}
+/* ===== СТИЛИ ДЛЯ ПОИСКА AUDIUS ===== */
+.search-container {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+#search-input {
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: background 0.3s;
+}
+
+#search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+#search-input:focus {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ===== СТИЛЬ ДЛЯ КНОПКИ "ПОКАЗАТЬ ЕЩЁ" ===== */
+.btn-load-more {
+  margin-top: 15px;
+  padding: 10px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.btn-load-more:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-load-more:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
