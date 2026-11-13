@@ -44,14 +44,15 @@ function formatAudiusTracks(rawTracks) {
     let coverUrl = null;
     let mirrors = [];
 
+    // Проверяем, есть ли вообще объект artwork
     if (track.artwork) {
-      // Ищем ссылку на картинку (разные версии API могут отдавать по-разному)
+      // Берем картинку 480x480 (или любую доступную)
       if (track.artwork['480x480']) coverUrl = track.artwork['480x480'];
       else if (track.artwork['150x150']) coverUrl = track.artwork['150x150'];
       else if (track.artwork['1000x1000']) coverUrl = track.artwork['1000x1000'];
-      else if (track.artwork.url) coverUrl = track.artwork.url; // На всякий случай
 
-      // Сохраняем список запасных серверов
+      // Забираем список зеркал (запасных серверов)
+      // Если Audius их не прислал, оставляем пустой массив
       if (track.artwork.mirrors) {
         mirrors = track.artwork.mirrors;
       }
@@ -61,9 +62,10 @@ function formatAudiusTracks(rawTracks) {
       title: track.title,
       artist: track.user.name,
       src: `https://api.audius.co/v1/tracks/${track.id}/stream`,
-      cover: coverUrl,
-      coverMirrors: mirrors,
-      color: '#ffffff'
+      // Если ссылки нет — ставим null, чтобы сработала заглушка
+      cover: coverUrl, 
+      coverMirrors: mirrors, // Сохраняем зеркала
+      color: '#ffffff' 
     };
   });
 }
@@ -72,7 +74,8 @@ function formatAudiusTracks(rawTracks) {
 // 2. ЗАГРУЗКА ИЗ AUDIUS
 // ==========================================
 async function searchAndLoad(query) {
-  const wasPlaying = !audio.paused; // Запоминаем, играла ли музыка
+  // ЗАПОМИНАЕМ: играла ли музыка прямо сейчас?
+  const wasPlaying = !audio.paused;
 
   currentQuery = query;
   currentOffset = 0;
@@ -179,37 +182,41 @@ function loadTrack(index) {
   titleEl.textContent = track.title;
   artistEl.textContent = track.artist;
 
-  // 1. Ставим заглушку (прозрачную или локальную)
-  coverEl.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; 
-  coverEl.onerror = null; 
+  // === МАГИЯ ОБЛОЖЕК ===
+  // 1. Сначала ставим заглушку, чтобы не висела старая картинка
+  coverEl.src = 'image/cover1.png'; 
+  coverEl.onerror = null; // Сбрасываем старый обработчик ошибок
 
-  // 2. Если у трека есть обложка, пытаемся её загрузить
   if (track.cover) {
+    // 2. Пытаемся загрузить основную ссылку
     coverEl.src = track.cover;
 
-    // 3. Если основная ссылка на картинку падает с ошибкой (сервер недоступен)
+    // 3. Если основная ссылка упала — перебираем зеркала
     coverEl.onerror = function() {
-      this.onerror = null; // Отключаем, чтобы не зациклиться
+      // Отключаем обработчик, чтобы не было бесконечного цикла
+      this.onerror = null; 
       
       if (track.coverMirrors && track.coverMirrors.length > 0) {
-        // Берем ссылку на картинку и подменяем домен на первое доступное зеркало
-        let newUrl = '';
+        // Берем первое зеркало из списка
+        const mirror = track.coverMirrors[0];
         try {
+          // Меняем хост в ссылке на зеркало
           const urlObj = new URL(track.cover);
-          const mirrorObj = new URL(track.coverMirrors[0]);
+          const mirrorObj = new URL(mirror);
           urlObj.host = mirrorObj.host;
-          newUrl = urlObj.toString();
+          
+          // Пробуем загрузить с зеркала (следующая ошибка вызовет onerror снова, если добавить логику)
+          // Для простоты пока просто ставим с зеркала
+          this.src = urlObj.toString(); 
+          
+          // (Если нужно перебрать все зеркала — тут нужна рекурсия, но для начала хватит и одного)
         } catch (e) {
-          console.warn("Ошибка парсинга URL зеркала", e);
+          // Если ссылки битые — оставляем заглушку
+          this.src = 'image/cover1.png';
         }
-
-        if (newUrl) {
-          // Пытаемся загрузить с зеркала. Если и оно упадет, 
-          // вернется текущая заглушка (потому что onerror = null).
-          this.src = newUrl;
-        } else {
-          this.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
-        }
+      } else {
+        // Если зеркал нет — окончательно ставим заглушку
+        this.src = 'image/cover1.png';
       }
     };
   }
@@ -296,17 +303,9 @@ audio.addEventListener('loadedmetadata', () => {
 audio.addEventListener('ended', () => nextBtn.click());
 
 // ====== ОБРАБОТКА ПОИСКА И КНОПКИ ======
-// ====== ОБРАБОТКА ПОИСКА (ИСПРАВЛЕНО ДЛЯ МОБИЛОК) ======
-const searchForm = document.getElementById('search-form');
-
-// Слушаем отправку формы (срабатывает при нажатии Enter на любой клавиатуре)
-searchForm.addEventListener('submit', (e) => {
-  e.preventDefault(); // Останавливаем перезагрузку страницы
-  
-  const query = searchInput.value.trim();
-  if (query) {
-    searchInput.blur(); // Принудительно прячем клавиатуру на телефоне
-    searchAndLoad(query);
+searchInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    searchAndLoad(searchInput.value);
   }
 });
 
