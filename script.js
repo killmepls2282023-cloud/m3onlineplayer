@@ -296,9 +296,17 @@ audio.addEventListener('loadedmetadata', () => {
 audio.addEventListener('ended', () => nextBtn.click());
 
 // ====== ОБРАБОТКА ПОИСКА И КНОПКИ ======
-searchInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
-    searchAndLoad(searchInput.value);
+// ====== ОБРАБОТКА ПОИСКА (ИСПРАВЛЕНО ДЛЯ МОБИЛОК) ======
+const searchForm = document.getElementById('search-form');
+
+// Слушаем отправку формы (срабатывает при нажатии Enter на любой клавиатуре)
+searchForm.addEventListener('submit', (e) => {
+  e.preventDefault(); // Останавливаем перезагрузку страницы
+  
+  const query = searchInput.value.trim();
+  if (query) {
+    searchInput.blur(); // Принудительно прячем клавиатуру на телефоне
+    searchAndLoad(query);
   }
 });
 
